@@ -33,14 +33,8 @@ export const JourneyPicker = () => {
   const [date, setDate] = useState('');
   const [cities, setCities] = useState([]);
   const [dates, setDates] = useState([]);
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    console.log('Odesílám formulář s cestou');
-    console.log('From City:', fromCity);
-    console.log('To City:', toCity);
-    console.log('Date:', date);
-  };
+  const [isButtonDisabled, setIsButtonDisabled] = useState(true);
+  const [error, setError] = useState('');
 
   useEffect(() => {
     const fetchCities = async () => {
@@ -63,6 +57,28 @@ export const JourneyPicker = () => {
     };
     fetchDates();
   }, []);
+
+  /*Do tlačítka „Vyhledat spoj“ přidán atribut disabled tak, aby tlačítko bylo povolené pouze v případě, že jsou vybrána obě města i datum.*/
+  useEffect(() => {
+    setIsButtonDisabled(!(fromCity && toCity && date));
+  }, [fromCity, toCity, date]);
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    try {
+      const response = await fetch(
+        'https://apps.kodim.cz/daweb/leviexpress/api/journey?fromCity=%E2%80%A6&toCity=%E2%80%A6&date=%E2%80%A6',
+      );
+      if (!response.ok) {
+        throw new Error('Failed to fetch data');
+      }
+      const data = await response.json();
+      setError(data);
+    } catch (error) {
+      setError(error.message);
+    }
+  };
 
   return (
     <div className="journey-picker container">
@@ -91,7 +107,12 @@ export const JourneyPicker = () => {
             </select>
           </label>
           <div className="journey-picker__controls">
-            <button className="btn" type="submit">
+            <button
+              className="btn"
+              type="submit"
+              disabled={isButtonDisabled}
+              onClick={handleSubmit}
+            >
               Vyhledat spoj
             </button>
           </div>
