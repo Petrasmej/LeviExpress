@@ -27,7 +27,7 @@ const DatesOptions = ({ dates }) => {
   );
 };
 
-export const JourneyPicker = () => {
+export const JourneyPicker = ({ onJournyChange }) => {
   const [fromCity, setFromCity] = useState('');
   const [toCity, setToCity] = useState('');
   const [date, setDate] = useState('');
@@ -68,13 +68,13 @@ export const JourneyPicker = () => {
 
     try {
       const response = await fetch(
-        'https://apps.kodim.cz/daweb/leviexpress/api/journey?fromCity=%E2%80%A6&toCity=%E2%80%A6&date=%E2%80%A6',
+        `https://apps.kodim.cz/daweb/leviexpress/api/journey?fromCity=${fromCity}&toCity=${toCity}&date=${date}`,
       );
       if (!response.ok) {
         throw new Error('Failed to fetch data');
       }
       const data = await response.json();
-      setError(data);
+      onJourneyChange(data.results);
     } catch (error) {
       setError(error.message);
     }
